@@ -1,0 +1,173 @@
+
+\frame{
+\sffamily
+\frametitle{General design rules for MH algorithms}
+\begin{itemize}
+\item  MH algorithms are highly modular but there is a trade-off between simplicity of implementation, speed, and mixing.
+
+\item Block highly-correlated parameters (but when there is not strong dependence individual samplers can move further than a blocked Gaussian).
+
+\item Reparameterizing the model to center it or to make parameters less correlated is usually helpful!  This is easy to do in the context of linear model, but not always so in other case (computing information matrices might provide hints).
+
+\item As a rule of thumb, you want to ``integrate out'' as many parameters as you can before attempting to use any Metropolis/Gibbs steps.
+However, introducing latent variables can greatly simplify algorithms and in some cases improve mixing.
+\end{itemize}
+}
+
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Blocking}
+
+{\footnotesize
+\begin{itemize}
+\item {\bf Example (litters GLMM):} We saw that univariate sampling worked poorly on the litters GLMM model. This is common in GLMMs -- the dependence between hyperparameters and random effects can impede mixing.
+
+Some strategies for random effects models:
+
+\begin{itemize}
+\item analytically integrate over random effects to reduce model dimensionality (not always feasible though feasible here)
+\item approximately integrate over random effects (e.g., INLA)
+\item expand the blocking to include the random effects
+\end{itemize}
+
+In the litters model, we could integrate the $p$'s out of the model and do block sampling on the hyperparameters.
+
+Alternatively, NIMBLE provides a \emph{cross-level} sampler that blocks hyperparameters with random effects when the random effects have a conjugate structure. This blocking is equivalent to marginalizing the $p$'s. This works much better than Metropolis-based blocking because the dependence is nonlinear.
+
+\end{itemize}
+}
+}
+
+
+\begin{frame}[fragile]
+\sffamily
+\frametitle{Blocking}
+
+\begin{itemize}
+\item {\bf Example (litters GLMM):}
+
+See \texttt{blocked-litters.R} for NIMBLE code for the blocked sampler.
+
+%% begin.rcode blocked-litters-config, size='tiny'
+%% end.rcode
+
+%% begin.rcode blocked-litters-mcmc, include=FALSE
+%% end.rcode
+
+\includegraphics[width=3in]{plots/blocked-litters.pdf}
+\end{itemize}
+\end{frame}
+
+\frame{
+\sffamily
+\frametitle{Centering}
+\begin{itemize}
+\item To illustrate the role of centering, consider a simple linear mixed model (random-intercept model).
+\begin{align*}
+y_{i,j} \mid \mu, \theta_i & \sim \normal(\eta + \theta_i, \sigma^2) ,  &   \eta &\sim \normal(0, \kappa^2 = \infty)  ,  &  \theta_i & \sim \normal(0, \tau^2) ,
+\end{align*}
+for $i=1, \ldots, I$ and $j=1, \ldots, J$.
+
+\item The full conditional distributions are
+\begin{align*}
+\theta_i \mid \eta &\sim \normal \left(  
+\frac{ \sum_{j=1}^{J} (y_{i,j} - \eta)/\sigma^2 }{\left( \frac{J}{\sigma^2} + \frac{1}{\tau^2} \right)}, 
+\left( \frac{J}{\sigma^2} + \frac{1}{\tau^2} \right)^{-1} 
+\right)  ,  \\
+%
+\eta \mid \theta_1, \ldots, \theta_I &\sim \normal \left(  
+\frac{ \sum_{i=1}^{I}\sum_{j=1}^{J} (y_{i,j} - \theta_i)/\sigma^2 }{\left( \frac{IJ}{\sigma^2} + \frac{1}{\kappa^2} \right)}, 
+\left( \frac{IJ}{\sigma^2} + \frac{1}{\kappa^2} \right)^{-1} 
+\right)  .
+\end{align*}
+\end{itemize}
+}
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Centering}
+\begin{center}
+\hspace{-0.8cm}
+\begin{tabular}{lr}
+\begin{minipage}{5cm}
+\vspace{0.2cm}
+\begin{itemize}
+\item We simulated data with $\eta = 0.8$, $\sigma^2 = 1$ and $\tau^2 = 2$, and ran the algorithm.
+\item $\theta_1$ and $\eta$ show high (negative) autocorrelation and slow mixing.
+\end{itemize}
+\end{minipage}
+%&
+\begin{minipage}{6cm}
+\includegraphics[height=5.7cm,angle=0]{plots/centering1.pdf}
+\end{minipage}
+\end{tabular}
+\end{center}
+}
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Centering}
+\begin{itemize}
+\item Instead, consider reparameterizing the model so that $\theta^{*}_i = \mu + \theta_i$ so that
+\begin{align*}
+y_{i,j} \mid \mu, \theta^{*}_i & \sim \normal(\theta^{*}_i, \sigma^2)  ,  &  \theta^{*}_i & \sim \normal(\eta, \tau^2) ,  &   \eta &\sim \normal(0, \kappa^2) .
+\end{align*}
+
+\item The full conditional distributions are
+\begin{align*}
+\theta^{*}_i \mid \eta &\sim \normal \left(  
+\frac{ \frac{\sum_{j=1}^{J} y_{i,j}}{\sigma^2} + \frac{\eta}{\tau^2}}{\left( \frac{J}{\sigma^2} + \frac{1}{\tau^2} \right)}, 
+\left( \frac{J}{\sigma^2} + \frac{1}{\tau^2} \right)^{-1} 
+\right)  ,  \\
+%
+\eta \mid \theta^{*}_1, \ldots, \theta^{*}_I &\sim \normal \left(  
+\frac{ \frac{\sum_{i=1}^{I} \theta^{*}_i}{\tau^2} }{\left( \frac{I}{\tau^2} + \frac{1}{\kappa^2} \right)}, 
+\left( \frac{I}{\tau^2} + \frac{1}{\kappa^2} \right)^{-1} 
+\right)  .
+\end{align*}
+\end{itemize}
+}
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Centering}
+\begin{center}
+\hspace{-0.8cm}
+\begin{tabular}{lr}
+\begin{minipage}{5cm}
+\vspace{0.2cm}
+\begin{itemize}
+\item We ran this MCMC for the same dataset as before and backtransformed the samples to get $\theta_i = \theta^{*}_i - \eta$.
+\item Mixing for $\theta_1$ and $\eta$ is quite good now.
+\item See NIMBLE code in \texttt{mh-centering.R}.
+\end{itemize}
+\end{minipage}
+%&
+\begin{minipage}{6cm}
+\includegraphics[height=5.7cm,angle=0]{plots/centering2.pdf}
+\end{minipage}
+\end{tabular}
+\alert{Centering is not universally better, but it usually is!}
+See \citep{yu2011center} for how to combine centered and uncentered.
+
+\end{center}
+}
+
+
+
+
