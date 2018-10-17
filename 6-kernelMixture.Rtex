@@ -1,0 +1,102 @@
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Beyond the Metropolis-Hasting algorithm}
+\begin{itemize}
+\item  Our description of the Metropolis-Hastings algorithm involved a single joint proposal for all entries of $\bftheta$.
+
+\item However, even using adaptive algorithms as the ones described later, making good proposals in high dimensions is difficult.  It would be helpful if we could work with one dimension (or a small number of dimensions) at a time and make low-dimensional updates.
+
+\item Such approach actually works, and can be justified by considering mixtures of kernels!
+\end{itemize}
+}
+
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Mixtures of kernels}
+\begin{itemize}
+%\item You do not have to update parameters one at a time, you might decide to update groups of parameters simultaneously $\Rightarrow$  \alert{Blocking} (usually improves the convergence).
+
+%\item Indeed, updating parameters individually usually works best when parameters are (approximately) orthogonal (independent) a posteriori.  When they are highly correlated a posteriori, it is preferable to sample them jointly using proposals that acknowledge that correlation!
+
+\item You do not have to update parameters one at a time, you might decide to update subgroups of parameters.
+
+\vspace{2mm}
+
+\item In addition to random sweeps, you can run through the kernels sequentially.  Justification is based on a composition of kernels rather than a mixture.  
+
+\vspace{2mm}
+
+\item In sequential sweeps not all kernels need to be used with the same frequency (just like kernels do not have to be chosen with the same probability when doing random sweeps).
+
+\vspace{2mm}
+
+\item  It is important that all variables are updated at least once (but they could be updated multiple times).
+\end{itemize}
+}
+
+
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{The Gibbs sampler as a special case of the Metropolis}
+\begin{itemize}
+\item  We can take our argument one step further.  Suppose that you are working with the component-wise (or block-wise!) MH algorithm and that you are able to directly sample from the full conditional, so that you decide to use independent proposal (rather than a random-walk proposals) with
+$$
+q(\vartheta_i \mid \theta_i) = p(\vartheta_i \mid \theta_1, \ldots, \theta_{i-1}, \theta_{i+1}, \ldots, \theta_{p}).
+$$
+
+\item Note that in that case the acceptance probability is $1$ for all samples (the Hastings ratio is the reciprocal of the ratio of posteriors), and your MH algorithm reduces to (sequentially) sampling from all full conditional distributions!
+\begin{itemize}
+\item This is what we called the Gibbs sampler.
+\end{itemize}
+
+
+\end{itemize}
+}
+
+\begin{frame}[fragile] 
+\sffamily
+\frametitle{The Gibbs sampler as a special case of the Metropolis}
+{\small
+\begin{itemize}
+\item {\bf Example (litters GLMM):} NIMBLE's default samplers use a Gibbs-based strategy of cycling through individual parameters with either Metropolis or conjugate samplers assigned individually:
+
+%% begin.rcode litters-code2, include=FALSE
+%% end.rcode
+%% begin.rcode litters-model2, include=FALSE
+%% end.rcode
+%% begin.rcode litters-default-mcmc, size='tiny'
+%% end.rcode
+While Gibbs sampling is often effective, when there is strong posterior dependence, it can have bad convergence and bad mixing.
+\end{itemize}
+
+}
+\end{frame}
+
+\frame{
+\sffamily
+\frametitle{The Gibbs sampler as a special case of the Metropolis}
+
+\begin{itemize}
+\item {\bf Example (litters GLMM):} Here are traceplots (see \texttt{gibbs-litters.R} for the code).
+\begin{center}
+\includegraphics[width=2.8in]{plots/gibbs-litters.pdf}
+\end{center}
+
+Despite knowing the exact conditional distributions for $p$, the poor mixing of the hyperparameters in the priors for $p$ produce bad mixing for $p$ values for the first group.
+\end{itemize}
+}
