@@ -1,0 +1,168 @@
+\section{SMC}
+
+\frame{
+\sffamily
+\frametitle{Importance sampling}
+\begin{itemize}
+\item Let's go back to the problem of approximating integrals of the form
+$$
+\int h(\bftheta) p(\bftheta \mid \bfy) \dd \bftheta  ,
+$$
+where $h$ is an integrable function and $p(\bftheta \mid \bfy)$ is the posterior distribution induced by our model.
+
+\item We return to the idea of ``replacing'' $p(\bftheta \mid \bfy)$ with $g(\bftheta)$ from which it is easy to generate, we can write
+\begin{align*}
+\int h(\bftheta) p(\bftheta \mid \bfy) \dd \bftheta  &= \int h(\bftheta) \frac{ p(\bftheta \mid \bfy)}{g(\bftheta)} g(\bftheta) \dd \bftheta  \\ 
+&= \int h(\bftheta) w(\bftheta, \bfy) g(\bftheta) \dd \bftheta ,
+\end{align*}
+where $w(\bftheta, \bfy) = \frac{ p(\bftheta \mid \bfy)}{g(\bftheta)}$ is a ``weight'' function.
+\end{itemize}
+}
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Importance sampling}
+\begin{itemize}
+\item As long as the support of $g$ contains the support of $p(\bftheta \mid \bfy)$, the WLLN ensures that if $\bftheta_1^{(1)}, \ldots, \bftheta_1^{(B)}$ are independent and identically distributed samples from $g$ then
+\begin{align*}
+\frac{\sum_{b=1}^{B} h\left( \bftheta^{(b)} \right) w\left( \bftheta^{(b)} , \bfy \right) }
+{\sum_{b=1}^{B}  w\left( \bftheta^{(b)} , \bfy \right) }  & \underset{B \to \infty}{\longrightarrow} \E \left\{ h\left( \bftheta^{(b)} \right) \right\} 
+\end{align*}
+
+\item Almost any $g$ works in principle.  However, if you want your estimator to have a finite variance, then  you need $g$ such that
+$$
+\int h^2(\bftheta) \frac{p^2(\bftheta \mid \bfy)}{g(\bftheta)} \dd \bftheta  < \infty .
+$$
+A necessary condition for this to be satisfied is that $g$ has heavier tails than $p(\bftheta \mid y)$!
+\end{itemize}
+}
+
+
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Importance sampling}
+\begin{itemize}
+
+\item The optimal importance sampling distribution should be a good approximation to 
+$h(\bftheta) p(\bftheta \mid \bfy)$ rather than a good approximation to $p(\bftheta \mid \bfy)$.  For example, consider $p = \Pr(X > 2)$ where $X\sim \Cauchy(0,1)$.
+
+\begin{itemize}
+\item  The naive estimator is given by 
+$$
+\hat{p}_1 = \frac{1}{B} \sum_{b=1}^{B} \ind_{\{ x^{(b)} > 2 \}} ,
+$$
+where $x^{(b)} \sim \Cauchy(0,1)$.  Its variance $0.127/B$.
+
+\item A much better alternative is to estimate $p$ using 
+$$
+\hat{p}_2 = \frac{1}{B} \sum_{b=1}^{B} \frac{ \left( x^{(b)} \right)^{-2} }{2\pi \left\{ 1 + \left( x^{(b)} \right)^{-2} \right\}} ,
+$$
+where $x^{(b)} \sim \Uni[0,1/2]$.  Its variance $0.095/B$.
+\end{itemize}
+
+\end{itemize}
+}
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Importance sampling}
+\begin{itemize}
+\item A way to evaluate the efficiency of the algorithm is through the equivalent sample size (ESS):
+$$
+ESS =   \frac{\left\{ \sum_{b=1}^{B} w\left( \bftheta^{(b)} , \bfy \right) \right\}^2}{\sum_{b=1}^{B} \left\{ w\left( \bftheta^{(b)} , \bfy \right)\right\}^2 }  .
+$$
+The interpretation of this ESS is analogous to that of the ESS we discussed for MCMC methods.  In particular, if all the weights are identical then $ESS = B$, while if all weight is concentrated on a single particle then $ESS = 1$.
+\end{itemize}
+}
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Importance sampling}
+\begin{itemize}
+\item {\bf Example (unknown Gaussian mean with Cauchy priors):  }  Consider a simple model where $y_1, \ldots, y_n$ are iid with $y_i \sim \normal(\theta, 1)$, and where we use a ``robust'' prior $\theta \sim \Cauchy(0,1)$.  The posterior distribution is proportional to
+\begin{align*}
+\left( \frac{1}{1 + \theta^2} \right) \exp \left\{ -\frac{n}{2} \left(  \theta^2 - 2 \theta \bar{y} \right) \right\}  .
+\end{align*}
+
+We are interested in computing the posterior mean: 
+\begin{align*}
+\E\left\{ \theta \mid \bfy \right\} = \frac{\int_{-\infty}^{\infty} \left( \frac{\theta}{1 + \theta^2} \right) \exp \left\{ -\frac{n}{2} \left(  \theta^2 - 2 \theta \bar{y} \right)  \right\}  \dd \theta
+}
+%
+{ \int_{-\infty}^{\infty} \left( \frac{1}{1 + \theta^2} \right) \exp \left\{ -\frac{n}{2} \left(  \theta^2 - 2 \theta \bar{y} \right)  \right\}  \dd \theta}.
+\end{align*}
+An analytic solution for this expectation is not available.
+\end{itemize}
+}
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Importance sampling}
+\begin{itemize}
+\item {\bf Example (unknown Gaussian mean with Cauchy priors):  }  You could use the prior as the importance distribution:
+$$
+\E\left\{ \theta \mid \bfy \right\} \approx \frac
+{\sum_{b=1}^{B} \theta^{(b)} \exp \left\{ -\frac{n}{2} \left(  \theta^{(b)2} - 2 \theta^{(b)} \bar{y} \right)  \right\}  }
+{\sum_{b=1}^{B} \exp \left\{ -\frac{n}{2} \left(  \theta^{(b)2} - 2 \theta^{(b)} \bar{y} \right)  \right\}  }.
+$$
+This estimator is implemented in \texttt{impsampex\_v1.R}.  
+%Note that just a few samples (located around the mean of the data) receive most of the weight!  Accordingly, the ESS is very small (around 4). Hence, this estimator has a very large variance (run the algorithm multiple times to get a sense of the Monte Carlo error).
+
+A more reasonable importance function use knowledge about the shape of $p(\theta \mid \bfy)$
+{\scriptsize $$
+\E\left\{ \theta \mid \bfy \right\} \approx \frac
+{\sum_{b=1}^{B} \theta^{(b)}  \left( \frac{1 +  n\{\theta^{(b)} - \bar{y}\}^2}{1 + \theta^{2(b)}} \right) \exp \left\{ -\frac{n}{2} \left(  \theta^{(b)2} - 2 \theta^{(b)} \bar{y} \right)  \right\}  }
+{\sum_{b=1}^{B} \left( \frac{1 +  n\{\theta^{(b)} - \bar{y}\}^2}{1 + \theta^{2(b)}} \right) \exp \left\{ -\frac{n}{2} \left(  \theta^{(b)2} - 2 \theta^{(b)} \bar{y} \right)  \right\}  }.
+$$ }
+where $\theta^{(b)} \sim \Cauchy(\bar{y}, 1/n)$.  See \texttt{impsampex\_v2.R}.
+
+\end{itemize}
+}
+
+
+
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Importance sampling}
+\begin{itemize}
+\item Importance sampling schemes can also be interpreted as providing an approximation to $p(\bftheta \mid \bfy)$:
+$$
+\hat{p}_{B}(\bftheta \mid \bfy) =  \sum_{b=1}^{B}  \omega \left(\bftheta^{(b)}, \bfy \right) \delta_{\bftheta^{(b)}} (\bftheta)  ,
+$$
+where $\delta_x (\bftheta)$ denotes the Dirac point mass at $x$.
+
+\item Then, a fancy way to write the importance sampling estimator is as
+$$
+\int h(\bftheta) \hat{p}_B(\bftheta \mid y) \dd \bftheta \to \int h(\bftheta) p_B(\bftheta \mid y) \dd \bftheta  .
+$$
+Since this is true for any integrable function $h$, it implies that
+\begin{align*}
+ \hat{p}_B(\bftheta \mid y)  &\to p_B(\bftheta \mid y)   & \mbox{ in distribution}  .
+\end{align*}
+\end{itemize}
+}
+
+
+
