@@ -1,0 +1,223 @@
+\section{Introduction}
+
+\frame{
+\sffamily
+\frametitle{The Bayesian approach to statistical inference}
+\begin{center}
+\includegraphics[height=7.0cm,angle=0]{plots/bayes.pdf}
+\end{center}
+}
+
+
+
+
+\frame{
+\sffamily
+\frametitle{The Bayesian approach to statistical inference}
+\begin{itemize}
+\item {\bf Example (estimating the mean of a normal):  }  Assume $y_1, \ldots, y_n$ is an independent and identically distributed sample with $y_i \mid \theta \sim \normal(\theta, 1)$ and assign $\theta$ a Gaussian prior, i.e., $\theta \sim \normal(\mu, \tau^2)$.  Our goal is to provide (Bayesian) point and interval estimates for the unknown parameter $\theta$.
+
+\vspace{1mm}
+
+The first stage in any Bayesian analysis is to determine the posterior density/probability mass function of the parameter(s) of interest (in this case $\theta$).
+
+
+\end{itemize}
+}
+
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{The Bayesian approach to statistical inference}
+
+\begin{itemize}
+\item  {\bf Example (estimating the mean of a normal, cont):}
+{\tiny \begin{align*}
+p(\bftheta \mid \bfy) =
+%
+\frac{\left(\frac{1}{2\pi}\right)^{n/2} \exp\left\{ - \frac{1}{2} \sum_{i=1}^{n}(y_i - \theta)^2\right\} \left(\frac{1}{2 \pi \tau^2}\right)^{1/2} \exp\left\{ - \frac{(\theta - \mu)^2}{2\tau^2} \right\}}
+%
+{\int_{-\infty}^{\infty} \left(\frac{1}{2\pi}\right)^{n/2} \exp\left\{ - \frac{1}{2} \sum_{i=1}^{n}(y_i - \theta)^2\right\} \left(\frac{1}{2 \pi \tau^2}\right)^{1/2} \exp\left\{ - \frac{(\theta - \mu)^2}{2\tau^2} \right\} \dd \theta}
+\end{align*}
+}
+
+Doing a completion of squares we get
+{\tiny \begin{align*}
+p(\bftheta \mid \bfy) =  \frac{\exp\left\{  -\frac{1}{2} \left( n + \frac{1}{\tau^2}\right) \left( \theta - \frac{ n\bar{y} + \frac{\mu}{\tau^2}}{n + \frac{1}{\tau^2}} \right)^2 + \frac{1}{2} \frac{ \left(n\bar{y} + \frac{\mu}{\tau^2}\right)^2}{n + \frac{1}{\tau^2}} \right\}}
+{\int_{-\infty}^{\infty} \exp\left\{  -\frac{1}{2} \left( n + \frac{1}{\tau^2}\right) \left( \theta - \frac{ n\bar{y} + \frac{\mu}{\tau^2}}{n + \frac{1}{\tau^2}} \right)^2 + \frac{1}{2} \frac{ \left(n\bar{y} + \frac{\mu}{\tau^2}\right)^2}{n + \frac{1}{\tau^2}} \right\} \dd \theta}\end{align*}}
+
+Hence $p(\theta \mid \bfy)$ correspond to a Gaussian distribution with mean $\frac{ n\bar{y} + \frac{\mu}{\tau^2}}{n + \frac{1}{\tau^2}}$ and variance $\left( n + \frac{1}{\tau^2}\right)^{-1}$!
+\end{itemize}
+}
+
+
+
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{The Bayesian approach to statistical inference}
+
+\begin{itemize}
+\item  {\bf Example (estimating the mean of a normal, cont):  }  Now that we have found the posterior distribution, we can use the posterior mean as a point estimator, i.e.,
+$$
+\tilde{\theta} = \E \left\{ \theta \mid \bfy \right\} = \frac{\int \theta p(\bfy \mid \theta) p(\theta) \dd \theta}{\int p(\bfy \mid \theta) p(\theta) \dd \theta} = \frac{ n\bar{y} + \frac{\mu}{\tau^2}}{n + \frac{1}{\tau^2}} .
+$$
+Besides being a ``natural'' measure of location of the posterior distribution, the posterior mean can be formally justified as begin the optimal estimator under squared error loss,
+\begin{align*}
+\E \left\{ \theta \mid \bfy \right\}  &=  \int_{-\infty}^{\infty} \theta p(\theta \mid \bfy) \dd \theta  \\
+%
+& = \argmax_{\vartheta} \frac{\int (\theta - \vartheta)^2 p(\bfy \mid \theta) p(\theta) \dd \theta}{\int p(\bfy \mid \theta) p(\theta) \dd \theta}
+\end{align*}
+\end{itemize}
+}
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{The Bayesian approach to statistical inference}
+\begin{itemize}
+\item  {\bf Example (estimating the mean of a normal, cont):  }  Similarly, interval estimates can be obtained by computing highest posterior density intervals (shortest intervals that contain a given amount of posterior probability).  
+
+\vspace{3mm}
+
+In our running example, and for an interval with $1-\alpha$ coverage, this reduces to 
+{\small $$
+\left(  \frac{ n\bar{y} + \frac{\mu}{\tau^2}}{n + \frac{1}{\tau^2}} - z_{\alpha/2} \left\{ n + \frac{1}{\tau^2}\right\}^{-\frac{1}{2}}
+,
+\frac{ n\bar{y} + \frac{\mu}{\tau^2}}{n + \frac{1}{\tau^2}} + z_{\alpha/2} \left\{ n + \frac{1}{\tau^2}\right\}^{-\frac{1}{2}} \right) .
+$$}
+
+HPD intervals can be justified using utility functions too!
+\end{itemize}
+}
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{The Bayesian approach to statistical inference}
+
+\begin{itemize}
+\item Generally speaking, once the model for the data and the priors/hyperpriors have been selected, performing Bayesian inference involves
+\begin{itemize}
+\item Computing expectations of functions of the parameters with respect to the posterior distribution.
+\item Maximizing the corresponding expected utility functions.
+\end{itemize}
+
+\vspace{1mm}
+
+\item We will mostly be focusing on cases where the second step is available in closed form (i.e., we assume simple, ``standard'' utility functions).
+\begin{itemize}
+\item Historically, the main challenge in using Bayesian methods for real-world problems has been how to do computation beyond simple conjugate models.
+\item Numerical integration methods such as Gaussian quadrature scale very poorly (typically not useful if $\mbox{dim}(\bftheta) > 4$).
+\end{itemize}
+\end{itemize}
+}
+
+
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{A summary of Bayesian computational methods}
+\begin{center}
+\hspace{-1.1cm}
+\begin{tabular}{lr}
+\begin{minipage}{5.6cm}
+\centerline{\bf Monte-Carlo integration}
+\vspace{0.2cm}
+\begin{itemize}
+{\small \item Generate samples from $\bftheta^{(1)}, \ldots, \bftheta^{(B)} \sim p(\bftheta \mid \bfy)$.
+
+\item Approximate 
+$$
+\int h(\bftheta) p(\bftheta \mid \bfy) \dd \bftheta \approx \sum_{b=1}^{B} h \left(\bftheta^{(b)} \right)
+$$ 
+(WLLN / Ergodic theorem).
+
+\item Examples:  Adaptive Rejection Sampling, Importance Sampling, Markov chain Monte Carlo, Sequential Monte Carlo, Approximate Bayesian Computation.}
+\end{itemize}
+\end{minipage}
+%&
+\begin{minipage}{5.6cm}
+\centerline{\bf Approximation methods}
+\vspace{0.2cm}
+\begin{itemize}
+{\small \item Find a distribution $q(\bftheta)$ that is analytically tractable and is ``close'' to $p(\bftheta \mid \bfy)$.
+
+\item Approximate
+$$
+\int h(\bftheta) p(\bftheta \mid \bfy) \dd \bftheta \approx \int h(\bftheta) q(\bftheta) \dd \bftheta
+$$ 
+
+\item Examples: Laplace approximations, mean-field variational approximations, integrated nested Laplace
+approximations.}
+\end{itemize}
+\end{minipage}
+\end{tabular}
+\end{center}
+}
+
+
+
+\frame{
+\sffamily
+\frametitle{A summary of Bayesian computational methods}
+\begin{itemize}
+\item The previous methods are \textit{general}, in the sense that they allow for point and interval estimation, prediction and, in some cases (e.g., reversible jump MCMC, spike-and-slab priorss) variable selection/model comparison.
+
+\item In addition to them, there are methods that are \textit{specific} to either point estimation (typically finding posterior mode) or model selection (typically for computing marginal likelihoods and Bayes factors).
+\begin{itemize}
+\item Point estimation:  expectation-maximization (yes, it can be used in a Bayesian setting), (stochastic) conjugate gradient, feature selection.
+
+\item Bayes factors:  Harmonic Mean Estimation, Bridge Sampling, the marginal likelihood identity method of Chib, etc.
+\end{itemize}
+
+
+%MCMC methods for computing Bayes factors: a comparative review by: Cong Han, Bradley P. Carlin Journal of the American Statistical Association, Vol. 96 (September 2001), pp. 1122-1132  Key: citeulike:2113706
+\end{itemize}
+}
+
+
+
+
+\frame{
+\sffamily
+\frametitle{What this course is about!}
+\begin{itemize}
+\item As you can see, the literature is extensive, so we will select a small number of topics to discuss:
+\begin{itemize}
+\item MCMC techniques, including reversible jump, adaptive Monte Carlo, and Hamiltonian methods.
+
+\item Importance sampling and sequential Monte Carlo algorithms for state-space models, but not population Monte Carlo.
+
+\item Variational methods.
+
+\item Laplace approximations and INLA
+
+\end{itemize}
+
+\item Heavy focus on using \texttt{NIMBLE} and other software options to simplify implementation.
+\end{itemize}
+}
+
+
+
+
+
