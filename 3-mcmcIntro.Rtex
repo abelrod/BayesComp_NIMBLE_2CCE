@@ -1,0 +1,513 @@
+
+\section{MCMC}
+
+
+\frame{
+\sffamily
+\frametitle{Why simulation based methods:  A motivating example}
+\begin{itemize}
+\item  To illustrate the power of simulation methods, consider the problem of estimating the diagnostic power of a medical test, defined as the probability of a positive result in the test for a diseased individual.
+$$
+\eta = \Pr\left( D \mid T \right) .
+$$
+
+\item $\eta$ is not directly observable.  However, we can easily obtain data on the prevalence $\theta$, the false positive rate $\alpha$ and the false negative rate $\beta$,
+\begin{align*}
+\theta &= \Pr(D) , &
+\alpha & = \Pr \left( T \mid \bar{D} \right)  , &
+\beta & = \Pr \left( \bar{T} \mid D \right) ,
+\end{align*}
+by sampling individuals from the general population, the population of healthy individuals, and the population of diseased individuals, respectively.
+\end{itemize}
+}
+
+
+
+
+\frame{
+\sffamily
+\frametitle{A motivating example}
+\begin{itemize}
+\item Note that $\eta$ is related to $\theta$, $\alpha$ and $\beta$ by the formula:
+$$
+\eta(\theta, \alpha, \beta) = \frac{(1-\beta) \theta}{(1-\beta) \theta + \alpha (1-\theta)}  .
+$$
+(This is just Bayes theorem!)
+
+\item {\bf Statistical model: } Assuming that individuals are sampled at random from the corresponding populations 
+\begin{align*}
+x_1 &= \left\{ \mbox{\parbox[c][][c]{6cm}{\# of diseased individuals in a sample of size $n_1$ of the general population}} \right\}  \sim \Bin(n_1, \theta)  , \\
+x_2 &= \left\{\mbox{\parbox[c][][c]{6cm}{\# of positive individuals in a sample of size $n_2$ of healthy individuals}}\right\} \sim \Bin(n_2, \alpha) , \\
+x_3 &= \left\{\mbox{\parbox[c][][c]{6cm}{\# of positive individuals in a sample of size $n_3$ of diseased individuals}}\right\} \sim \Bin(n_3, 1-\beta)  .
+\end{align*}
+
+\end{itemize}
+}
+
+
+
+\frame{
+\sffamily
+\frametitle{A motivating example}
+\begin{itemize}
+\item A frequentist approach:
+\begin{itemize}
+\item {\bf Point estimation:  }  The MLEs for $\theta$, $\alpha$ and $\beta$ are
+\begin{align*}
+\hat{\theta} &= \frac{x_1}{n_1} ,   &  \hat{\alpha} &= \frac{x_2}{n_2} ,   &  \hat{\beta} &= 1 - \frac{x_3}{n_3} .
+\end{align*}
+Hence, the MLE of $\eta$ is simply $\hat{\eta} = \frac{(1-\hat{\beta}) \hat{\theta}}{(1-\hat{\beta}) \hat{\theta} + \hat{\alpha} (1-\hat{\theta})}$.
+\vspace{1mm}
+\item {\bf Interval estimation:  }  Finding a pivot for $\eta$ is hard.  However, an asymptotic approximate interval can be constructed using the Delta method
+\begin{align*}
+\Var(\hat{\eta}) \approx  
+%
+\left[ \left. \nabla \eta(\theta,\alpha,\beta) \right|_{(\hat{\theta},\hat{\alpha},\hat{\beta})} \right]^T 
+\bfSigma \left[ \left. \nabla \eta(\theta,\alpha,\beta) \right|_{(\hat{\theta},\hat{\alpha},\hat{\beta})} \right]
+\end{align*}
+where $\bfSigma = \diag\left\{ \Var(\hat{\theta}), \Var(\hat{\alpha}), \Var(\hat{\beta})  \right\}$.
+
+\vspace{2mm}
+
+For small samples, parametric bootstrap could be used (which is a simulation-based computational tool common in frequentist statistics).
+\end{itemize}
+\end{itemize}
+}
+
+
+
+\frame{
+\sffamily
+\frametitle{A motivating example}
+\begin{itemize}
+\item A frequentist approach (cont):
+\begin{itemize}
+\item {\bf Interval estimation (cont):  }  Parametric bootstrap:  Once $\hat{\theta}$,$\hat{\alpha}$ and $\hat{\beta}$ have been computed, repeat the following steps for $b=1,\ldots,B$ where $B$ is ``large'':
+\begin{enumerate}
+\item Sample imaginary samples $x_1^{(b)} \sim \Bin(n_1, \hat{\theta})$, $x_2^{(b)} \sim \Bin(n_2, \hat{\alpha})$ and $x_3^{(b)} \sim \Bin(n_3, 1 - \hat{\beta})$.
+
+\item Compute $\tilde{\theta}^{(b)} = \frac{x_1^{(b)}}{n_1}$, $\tilde{\alpha}^{(b)} = \frac{x_2^{(b)}}{n_2}$ and $\tilde{\beta}^{(b)} = 1-\frac{x_3^{(b)}}{n_3}$ and let $\tilde{\eta}^{(b)} = \frac{(1-\tilde{\beta}^{(b)}) \tilde{\theta}^{(b)}}{(1-\tilde{\beta}^{(b)}) \tilde{\theta}^{(b)} + \tilde{\alpha}^{(b)} (1-\tilde{\theta}^{(b)})}$.
+\end{enumerate}
+
+\vspace{2mm}
+
+Then, an $\epsilon$-coverage confidence interval for $\eta$ is obtained by computing the $\epsilon/2$ and $1-\epsilon/2$ quantiles of the sample $\tilde{\beta}^{(1)} , \ldots, \tilde{\beta}^{(B)}$.
+\end{itemize}
+\end{itemize}
+}
+
+
+
+\frame{
+\sffamily
+\frametitle{A motivating example}
+\begin{itemize}
+\item A Bayesian approach:
+\begin{itemize}
+\item {\bf Priors:  }  Natural non-informative priors for this problem are $\theta \sim \bet\left( \frac{1}{2} , \frac{1}{2}\right)$, $\alpha \sim \bet\left( \frac{1}{2} , \frac{1}{2}\right)$ and $\beta \sim \bet\left( \frac{1}{2} , \frac{1}{2}\right)$.
+
+\vspace{2mm}
+
+\item {\bf Posteriors:  }  Because of independence and conjugacy we have 
+{\scriptsize \begin{multline*}
+p(\theta, \alpha, \beta \mid x_1, x_2, x_3) = \bet \left( \theta \mid \frac{1}{2} + x_1 , \frac{1}{2} + n_1 - x_1 \right) \\
+%
+\bet \left( \alpha \mid \frac{1}{2} + x_2 , \frac{1}{2} + n_2 - x_2 \right) 
+%
+\bet \left( \beta \mid \frac{1}{2} + n_3 - x_3 , \frac{1}{2} + x_3 \right)
+\end{multline*}}
+Since $\eta$ is a function of $(\theta,\alpha,\beta)$, its posterior can be obtained through transformations.  However, in this case, this is extremely messy ... Try it yourself.
+\end{itemize}
+\end{itemize}
+}
+
+
+
+\frame{
+\sffamily
+\frametitle{A motivating example}
+\begin{itemize}
+\item A Bayesian approach:
+\begin{itemize}
+\item {\bf Using a simulation-based approach:  }    Instead of trying to find a closed-form expression for $p(\eta \mid x_1, x_2, x_3)$, sample!
+
+\begin{enumerate}
+\item For $b=1,\ldots,B$ generate $\theta^{(b)} \sim \bet \left( \frac{1}{2} + x_1 , \frac{1}{2} + n_1 - x_1 \right)$, $\alpha^{(b)} \sim \bet \left( \frac{1}{2} + x_2 , \frac{1}{2} + n_2 - x_2 \right)$ and $\beta^{(b)} \sim \bet \left( \frac{1}{2} + n_3 - x_3 , \frac{1}{2} + x_3 \right)$.
+
+\item For $b=1,\ldots,B$ let $\eta^{(b)} = \frac{(1-\beta^{(b)}) \theta^{(b)}}{(1-\beta^{(b)}) \theta^{(b)} + \alpha^{(b)} (1-\theta^{(b)})}$.
+\end{enumerate}
+
+\item Density $\Rightarrow$ histogram or a kernel density estimator.
+
+\item Posterior mean or median $\Rightarrow$ Empirical ean or median.
+
+\item An $\epsilon$-probability credible interval $\Rightarrow$ $\epsilon/2$ and $1-\epsilon/2$ quantiles of $\eta^{(1)}, \ldots, \eta^{(B)}$.
+\end{itemize}
+\end{itemize}
+\begin{center}
+Let's run the scripts in the file \texttt{simulationmotivation.R}.
+\end{center}
+}
+
+
+
+\frame{
+\sffamily
+\frametitle{Motivation for MCMC algorithms}
+\begin{itemize}
+\item Direct sampling like in the previous example is not feasible for many models of interest, particularly those involving large numbers of parameters.
+
+\item In \textit{optimization} problems, this ``curse of dimensionality'' is dealt with by using conditional gradient algorithms.
+\end{itemize}
+\vspace{-8mm}
+\begin{center}
+\begin{tabular}{lr}
+\begin{minipage}{5.2cm}
+Conditional gradient algorithms repeatedly optimizes along one single dimension while keeping the value of the rest fixed.
+\end{minipage}
+&
+\begin{minipage}{5.2cm}
+\begin{center}
+\includegraphics[height=5.4cm,angle=0]{plots/rconjugategradient.pdf}\\
+\end{center}
+\end{minipage}
+\end{tabular}
+\end{center}
+}
+
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Motivation for MCMC algorithms}
+\begin{itemize}
+\item {\bf Example (Gaussian distributions with unknown mean and variance):}  Assume that data $y_1, \ldots, y_n$ are independent and identically distributed with $y_i \mid \theta, \sigma^2 \sim \normal(\theta, \sigma^2)$ and that we use independent priors $\theta \sim \normal (\mu, \tau^2)$ and $\sigma^2 \sim \IGam(a, c)$.  After some algebra the posterior distribution reduces to
+\begin{multline*}
+p(\theta, \sigma^2 \mid y_1, \ldots, y_n) \propto \left(\frac{1}{\sigma^2}\right)^{\frac{n}{2} + a + 1} \\
+%
+\exp\left\{ -\frac{n\theta^2 - 2n\theta \bar{y} + \sum_{i=1}^{n} y_i^2 + 2c}{2\sigma^2} - \frac{\theta^2 - 2\theta\mu + \mu^2}{2\tau^2}   \right\} .
+\end{multline*}
+This posterior is intractable (by which I mean, computing means/variances and cumulative probabilities is difficult).
+
+\end{itemize}
+}
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Motivation for MCMC algorithms}
+\begin{itemize}
+\item {\bf Example (Gaussian distributions with unknown mean and variance, cont):}  However, we can try to find the posterior mode (which would provide us with a point estimate for $(\theta, \sigma^2)$ in the same spirit as the MLE) using iterative conditional modes.  
+
+\vspace{1mm}
+
+Starting with some initial guess $\left(\theta^{(0)}, \sigma^{2(0)} \right)$ (such as $\left(\theta^{(0)}, \sigma^{2(0)} \right) = \left( \bar{y}, \Var(y) \right)$), iterate through:
+\begin{enumerate}
+\item Set $\theta^{(b)} = \frac{\frac{n \bar{y}}{\sigma^{2(b-1)}} + \frac{\mu}{\tau^2}}{\frac{n}{\sigma^{2(b-1)}} + \frac{1}{\tau^2}}$.
+\item Set $\sigma^{2(b)} = \frac{2 b + \sum_{i=1}^{n}\left(y_i - \theta^{(b)} \right)^2}{n + 2a + 2}$.
+\end{enumerate}
+The algorithm is stopped when the value of the posterior ``does not change'' from one iteration to the next.
+
+\vspace{1mm}
+
+See the file \texttt{simpleconjugategradient.R}.
+\end{itemize}
+}
+
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Motivation for MCMC algorithms}
+\begin{itemize}
+\item Iterative conditional modes only gives us a point estimator and does not allow for full exploration of the posterior distribution (e.g., to compute credible intervals).  
+
+\item What would be an equivalent idea for \textit{sampling} from a distribution $p(\bftheta)$ with $\bftheta = (\theta_1, \ldots, \theta_p)$?
+\begin{itemize}
+\item If we consider a single dimension at a time we end up working with the \textit{full conditional} $p(\theta_i \mid \theta_1, \ldots, \theta_{i-1}, \theta_{i+1}, \ldots, \theta_{p})$.
+\item Because we are trying to sample, maybe we can get a new value of $\theta_i$ by simulating from $p(\theta_i \mid \theta_1, \ldots, \theta_{i-1}, \theta_{i+1}, \ldots, \theta_{p})$ instead of by maximizing it.
+\end{itemize}
+
+\item Does this work?
+\begin{itemize}
+\item Generally speaking, the answer is yes, this is the Gibbs sampler!
+\end{itemize}
+
+\end{itemize}
+}
+
+
+
+\frame{
+\sffamily
+\frametitle{Motivation for MCMC algorithms}
+\begin{itemize}
+\item {\bf Example (Gaussian distributions with unknown mean and variance, cont):}  We do not know how to sample directly from the posterior distribution.  However:
+\begin{align*}
+\theta \mid \sigma^2, y_1, \ldots, y_n \sim \normal \left( 
+\frac{\frac{n \bar{y}}{\sigma^2} + \frac{\mu}{\tau^2}}{\frac{n}{\sigma^2} + \frac{1}{\tau^2}}  ,
+%
+\frac{1}{\frac{n}{\sigma^2} + \frac{1}{\tau^2}}
+\right) ,
+\end{align*}
+and
+\begin{align*}
+\sigma^2 \mid \theta, y_1, \ldots, y_n \sim \IGam \left( 
+a + \frac{n}{2} ,
+%
+c + \frac{1}{2} \sum_{i=1}^{n} (y_i -\theta)^2 
+\right) .
+\end{align*}
+\end{itemize}
+(To find these full conditionals, just drop from the posterior all the -- multiplicative --  terms that do not involve the parameter of interest, and then try to recognize what is left as the kernel of a known distribution.) 
+}
+
+
+\frame{
+\sffamily
+\frametitle{Motivation for MCMC algorithms}
+\begin{itemize}
+\item {\bf Example (Gaussian distributions with unknown mean and variance, cont):}  The iterative algorithm looks like this
+
+\begin{enumerate}
+\item Initialize $\tilde{\theta}^{(0)}$ and $\tilde{\sigma}^{2(0)}$.
+\item For $b=1,\ldots, B$ repeat
+\begin{enumerate}
+\item Sample $\tilde{\theta}^{(b)} \sim \normal \left( 
+\frac{\frac{n \bar{y}}{\tilde{\sigma}^{2(b-1)}} + \frac{\mu}{\tau^2}}{\frac{n}{\tilde{\sigma}^{2(b-1)}} + \frac{1}{\tau^2}}  ,
+%
+\frac{1}{\frac{n}{\tilde{\sigma}^{2(b-1)}} + \frac{1}{\tau^2}}
+\right)$.
+\item Sample $\tilde{\sigma}^{2(b)} \sim  \IGam \left( 
+a + \frac{n}{2} ,
+%
+c + \frac{1}{2} \sum_{i=1}^{n} \{y_i -\tilde{\theta}^{(b)}\}^2 
+\right)$.
+\end{enumerate}
+\end{enumerate}
+
+\vspace{1mm}
+
+An example of this implementation in R is available in the file \texttt{simpleGibbs.R}.
+\begin{itemize}
+\item Run the algorithm first with $\theta^{(0)} = 98$ and $\sigma^{2(0)} = 1$ and then with $\theta^{(0)} = 0$ and $\sigma^{2(0)} = 1600$.  What differences do you see in the trace plots?
+\end{itemize}
+\end{itemize}
+}
+
+
+
+\frame{
+\sffamily
+\frametitle{Motivation for MCMC algorithms}
+\begin{itemize}
+\item A couple of things to keep in mind:
+
+\begin{itemize}
+\item Unlike iterative conditional modes, we care about all numbers generated by the sampler, not only about the last one (we are trying to explore the whole distribution, not just find where the mean/median/mode is).
+
+\item Note that when the initial values are too far from where most of the mass of the posterior is located (as in the second set of initial values), the first few samples are clearly wrong and can seriously bias the results. Hence they need to be discarded.
+\end{itemize}
+
+\item Because in the Gibbs sampler we are dealing with a distribution, we need to think about convergence in the probabilistic sense (almost surely/distribution/probability) rather than in terms of convergence in the sense we talk in analysis.
+\end{itemize}
+}
+
+
+
+\frame{
+\sffamily
+\frametitle{Motivation for MCMC algorithms}
+\begin{itemize}
+\item Because the value of each pair $\left(\theta^{(b)}, \sigma^{2(b)}\right)$ depends on the value of $\left(\theta^{(b-1)}, \sigma^{2(b-1)}\right)$ (but NOT on $\left(\theta^{(b-2)}, \sigma^{2(b-2)}\right) , \ldots , \left(\theta^{(1)}, \sigma^{2(1)}\right)$) we are actually dealing with a Markov chain!
+
+\item The Gibbs sampler is but one example of a class of algorithms that attempt to construct Markov chains whose limiting distributions correspond to the posterior distribution of interest, and then iterate the 
+chain to generate (dependent) samples that can be used to approximate any integral of interest.  Hence the name of Markov chain Monte Carlo methods!
+
+\item For a history of MCMC algorithms, see \cite{robert2011short}.
+\end{itemize}
+}
+
+
+
+\frame{
+\sffamily
+\frametitle{A brief review of Markov chains}
+\begin{itemize}
+\item A \textit{Markov chain} is a sequence of random variables $X_1, X_2, X_3 \ldots$ defined on a common probability space $(\Omega, \mathcal{B})$ such that the distribution of $X_t$ given $X_{t-1}, \ldots, X_{1}$ depends only on $X_{t-1}$, i.e., 
+\begin{multline*}
+\Pr(X_t \in A \mid X_{t-1} = x_{t-1}, \ldots, X_1 = x_1) = \\
+%
+\Pr(X_t \in A \mid X_{t-1} = x_{t-1})
+$$
+\end{multline*}
+
+\item It is convenient to think of $t$ as representing time.
+\end{itemize}
+}
+
+
+
+\frame{
+\sffamily
+\frametitle{A brief review of Markov chains}
+\begin{itemize}
+\item Markov chains are defined in terms of \textit{transition kernels}.
+
+\vspace{2mm}
+
+\item A \textit{transition kernel} is a function $K$ defined on $\Omega \times \mathcal{B}$ such that
+\begin{enumerate}
+\item For all $x \in \Omega$, $K(x,\cdot)$ is a probability measure.
+\item For all $A \in \mathcal{B}$, $K(\cdot, A)$ is measurable.
+\end{enumerate}
+
+\vspace{2mm}
+
+\item We will focus on \textit{time-homogeneous chains} where the transition kernel is the same for all $t$.
+\begin{itemize}
+\item When $\Omega$ is countable the transition kernel is a matrix such that $[\bfP ]_{x,y} = \Pr(X_t= y \mid X_{t-1} = x)$ where $x,y \in \Omega$.
+
+\vspace{2mm}
+
+\item When $\Omega$ is uncountable $K$ represents a conditional density, i.e., $\Pr(X_t \in A | X_{t-1} = x) = \int_A K(x,x') \dd x'$.
+\end{itemize}
+\end{itemize}
+}
+
+
+
+
+\frame{
+\sffamily
+\frametitle{A brief review of Markov chains}
+
+For simplicity we present the main concepts in the context of countable state spaces.
+
+\begin{itemize}
+\item Assuming that $\Omega$ contains exactly $K$ points, the state of a chain at time $t$ can be represented by a probability vector $\bfpi_t = (\pi_{t,1}, \ldots, \pi_{t,K})^T$.
+
+\vspace{2mm}
+
+\item The state of the chain at times $t$ and $t+1$ are related by $\bfpi_{t}^{T} \bfP = \bfpi_{t+1}^T$.
+
+\vspace{2mm}
+
+\item Similarly, the state of the chain at times $t$ and $t+k$ are related by $\bfpi_{t}^{T} \bfP^{k} = \bfpi_{t+1}^T$.
+\end{itemize}
+}
+
+
+\frame{
+\sffamily
+\frametitle{Stationary distribution of a Markov chain}
+\begin{itemize}
+\item A distribution $\tilde{\bfpi}$ is a \textit{stationary distribution} if $\tilde{\bfpi}^{T} \bfP = \tilde{\bfpi}^T$.
+
+\item A Markov chain (on a countable probability space) has a unique stationary distribution if and only if it is \textit{irreducible} and all of its states are \textit{positive recurrent}.
+\begin{itemize}
+\item A chain is irreducible if for every pair of states $i$, $j$  exist finite constants $n_{i,j}$ and $n_{j,i}$ such that $\Pr(X_{n_{i,j}} = j \mid X_0 = i) > 0$ and $\Pr(X_{n_{j,i}} = i \mid X_0 = j) > 0$.
+
+\item A state is positive recurrent if the time it takes to return to it once you leave it is finite, i.e., if
+\begin{align*}
+M_i &= \sum_{t=1}^{\infty} t \, f_{ii}^{t} < \infty
+\end{align*}
+where
+\begin{align*}
+f_{ii}^{t} &= \Pr(T_i = t) ,   &   T_i = \inf \left\{ t \ge 1 : X_t=i \mid X_0 = i \right\} .
+\end{align*}
+
+\end{itemize}
+\end{itemize}
+}
+
+
+
+
+\frame{
+\sffamily
+\frametitle{Limiting distribution of a Markov chain}
+\begin{itemize}
+\item A distribution $\hat{\bfpi}$ is called a \textit{limiting distribution} (or \textit{equilibrium distribution}) if for any $\bfpi_0$ we have $\lim_{n \to \infty} \bfpi_0^{T} \bfP^n = \hat{\bfpi}$.
+
+\item A Markov chain has a limiting distribution if the chain is positive recurrent chain, irreducible and aperiodic.
+\begin{itemize}
+\item A state $i$ has period $k$ if any return to state $i$ must occur in multiples of $k$ time steps, i.e., $k=\mbox{gcd} \left\{ n : \Pr(X_n=i \mid X_0=i) > 0 \right\}$
+\item A state with period $k=1$ is called aperiodic.
+\item \alert{An aperiodic chain has all its states being aperiodic (additional requirement compared to the stationary distribution).}
+\end{itemize}
+
+\item If a chain has a limiting distribution then it is equal to the unique stationary distribution! 
+\end{itemize}
+}
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{A brief review of Markov chains}
+\begin{itemize}
+\item If we can construct a Markov chain that has a unique stationary/limiting distribution that is identical to the one we are interested in (in our case, the posterior distribution), then we can generate samples from the posterior by using the following approach:
+\begin{itemize}
+\item Pick an initial state from the chain $x_0$ according to some distribution (often the prior).
+
+\item For $t = 1, \ldots, T$ iteratively sample $x_t$ from a multinomial distribution with parameter $(p_{x_{t-1}, 1}, \ldots, p_{x_{t-1}, K})$.
+
+\item Use the samples so obtained to approximate any posterior summary of interest.
+\end{itemize}
+\end{itemize}
+}
+
+
+
+
+\frame{
+\sffamily
+\frametitle{A brief review of Markov chains}
+\begin{itemize}
+\item Some caveats!
+\begin{itemize}
+\item The samples generated by the chain will be (approximately) identically distributed.  \alert{However, they will not be independent}, so convergence of empirical averages to integrals cannot be argued using standard arguments (e.g., WLLN).  Instead, the \textit{ergodic theorem} needs to be used to justify the convergence of averages.
+
+\item Additionally, because samples are not independent, the variance of the estimates will depend not only on how many samples are generated, but also on the autocorrelation!  This means we might need more samples than if we had a direct sampler.
+ 
+\item Unless the initial state is sampled from the stationary distribution (which will rarely be the case) the first few samples will follow a distribution that can be very different from the stationary distribution (and therefore need to be discarded!)
+%\begin{itemize}
+%\item How many samples need to be discarded (we call this the ``burn-in'' period) depends both on how far $\pi_0$ is from $\hat{\pi}$ and how large the second eigenvalue of $\bfP$ is.
+%\end{itemize}
+\end{itemize}
+
+\end{itemize}
+}
+
+
+
+
+
+\frame{
+\sffamily
+\frametitle{A brief review of Markov chains}
+\begin{itemize}
+\item Given a transition matrix, finding the stationary/limiting distribution is not too difficult.  However, in Bayesian statistics we are faced with the opposite problem:  we know the stationary/limiting distribution and need to come up with (at least one) transition kernel that generates it.
+
+\item Reversibility is a concept that can help in the construction of such chains.
+
+\item A Markov chain with transition matrix $\bfP$ and stationary distribution $\tilde{\bfpi}$ is said to be \textit{reversible} if $\tilde{\pi}_i p_{i,j} = \tilde{\pi}_j p_{j,i}$.  This equation is called the \alert{detailed balance equation}.
+
+\item Roughly speaking, if we know what the stationary distribution should look like, the detailed balance equations tell us that we can choose $p_{i,j}$ for $i > j$ in whichever way we want as long we then make $p_{j,i} = \frac{\pi_{i}}{\pi_{j}} p_{i,j}$.
+\end{itemize}
+}
+
+
+
