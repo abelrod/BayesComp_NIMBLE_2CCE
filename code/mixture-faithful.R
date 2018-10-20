@@ -6,12 +6,6 @@ n <- length(y)
 
 ## @knitr mixture-auxiliary-code
 
-## use of non-constant indexes requires NIMBLE version 0.6-6
-if(packageVersion('nimble') < '0.6.6')
-    stop("NIMBLE version 0.6-6 or greater required for non-constant indexes.")
-
-nimbleOptions(allowDynamicIndexing = TRUE) ## it's a beta feature in 0.6-6
-
 mixCode <- nimbleCode({
     for(i in 1:n) {
         y[i] ~ dnorm(theta[ksi[i]+1], var = sigma2[ksi[i]+1])
@@ -40,9 +34,7 @@ mcmc <- buildMCMC(conf)
 cmcmc <- compileNimble(mcmc, project = mixModel)
 
 set.seed(1)
-cmcmc$run(1000)
-
-smp <- as.matrix(cmcmc$mvSamples)
+smp <- runMCMC(cmcmc, 1000)
 
 burnin <- 500
 smp <- smp[-seq_len(burnin), ]
@@ -103,6 +95,7 @@ mixCode <- nimbleCode({
     }
 })
 
+## ignore the warning message about the size/dimension mismatch
 mixModel <- nimbleModel(mixCode, data = list(y = y),
                      constants = list(n = n),
                      inits = list(omega = 0.5, theta = rep(mean(y), 2),
@@ -115,9 +108,7 @@ mcmc <- buildMCMC(mixModel, monitors = c('omega', 'theta', 'sigma'))
 cmcmc <- compileNimble(mcmc, project = mixModel)
 
 set.seed(1)
-cmcmc$run(5000)
-
-smp <- as.matrix(cmcmc$mvSamples)
+smp <- runMCMC(cmcmc, 5000)
 
 burnin <- 1000
 smp <- smp[-seq_len(burnin), ]

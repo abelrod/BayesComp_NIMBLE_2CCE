@@ -52,9 +52,7 @@ mcmc <- buildMCMC(conf)
 cmcmc <- compileNimble(mcmc, project = blissModel)
 
 set.seed(1)
-cmcmc$run(nIts)
-
-smp_default <- as.matrix(cmcmc$mvSamples)
+smp_default <- runMCMC(cmcmc, nIts)
 
 
 conf <- configureMCMC(blissModel, nodes = NULL, thin = thin)
@@ -67,9 +65,7 @@ cmcmc <- compileNimble(mcmc, project = blissModel, resetFunctions = TRUE)
 cBlissModel$setInits(inits)
 
 set.seed(1)
-cmcmc$run(nIts)
-
-smp_slice <- as.matrix(cmcmc$mvSamples)
+smp_slice <- runMCMC(cmcmc, nIts)
 
 pdf(file.path('plots','slice-bliss.pdf'), width = 6, height = 3.5)
 par(mfrow = c(2, 3), mai=c(0.4,.4,.3,.1),mgp=c(1.8,.7,0))

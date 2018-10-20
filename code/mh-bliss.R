@@ -70,10 +70,9 @@ cmcmc <- compileNimble(mcmc, project = blissModel)
 
 nIts <- 10000
 set.seed(1)
-cmcmc$run(nIts)
+smp <- runMCMC(cmcmc, nIts)
 
 ## examine posterior samples
-smp <- as.matrix(cmcmc$mvSamples)[ , params]
 par(mfrow = c(1, 3))
 for(i in 1:3)
       ts.plot(smp[ , i])
@@ -100,9 +99,8 @@ cmcmc <- compileNimble(mcmc, project = blissModel, resetFunctions = TRUE)
 
 nIts <- 9000
 set.seed(1)
-cmcmc$run(nIts)
+smp <- runMCMC(cmcmc, nIts)
 
-smp <- as.matrix(cmcmc$mvSamples)
 apply(smp, 2, calcAccRate)
 
 par(mfrow = c(1, 3))
@@ -129,9 +127,9 @@ cmcmc <- compileNimble(mcmc, project = blissModel, resetFunctions = TRUE)
 
 set.seed(1)
 cBlissModel$setInits(inits)
-cmcmc$run(nIts)
 
-smp1 <- as.matrix(cmcmc$mvSamples)[ , params]
+smp1 <- runMCMC(cmcmc, nIts)
+smp1 <- smp1[ , params]
 apply(smp, 2, calcAccRate)
 
 par(mfrow = c(1, 3))
@@ -164,11 +162,11 @@ cmcmc <- compileNimble(mcmc, project = blissModel, resetFunctions = TRUE)
 
 set.seed(1)
 cBlissModel$setInits(inits)
-cmcmc$run(nIts)
+smp2 <- runMCMC(cmcmc, nIts)[ , params]
 ## adapted proposal covariance
 cov2cor(cmcmc$samplerFunctions[[1]]$propCov)
 
-smp2 <- as.matrix(cmcmc$mvSamples)[ , params]
+
 for(i in 1:3)
       ts.plot(smp2[ , i])
 
@@ -186,9 +184,8 @@ cmcmc <- compileNimble(mcmc, project = blissModel, resetFunctions = TRUE)
 
 set.seed(1)
 cBlissModel$setInits(inits)
-cmcmc$run(nIts)
 
-smp3 <- as.matrix(cmcmc$mvSamples)[ , params]
+smp3 <- runMCMC(cmcmc, nIts)[ , params]
 par(mfrow = c(1, 3))
 for(i in 1:3)
       ts.plot(smp3[ , i])

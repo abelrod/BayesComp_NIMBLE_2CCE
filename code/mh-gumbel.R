@@ -54,11 +54,10 @@ cGumbelModel <- compileNimble(gumbelModel)
 cmcmc <- compileNimble(mcmc)
 set.seed(1)
 ### run the MCMC
-cmcmc$run(r)
+smp1 <- runMCMC(cmcmc, niter = r)
 
 ## @knitr gumbel-results
 ### basic diagnostics
-smp1 <- as.matrix(cmcmc$mvSamples)
 ## source('utils.R')
 accRate1 <- calcAccRate(smp1[ , 1])
 ess1 <- coda::effectiveSize(smp1)
@@ -70,9 +69,8 @@ conf$addSampler('theta', 'RW', control = list(adaptive = FALSE,
                                               scale = sqrt(tau2)))
 mcmc <- buildMCMC(conf)
 cmcmc <- compileNimble(mcmc, resetFunctions = TRUE)
-cmcmc$run(r)
+smp2 <- runMCMC(cmcmc, niter = r)
 
-smp2 <- as.matrix(cmcmc$mvSamples)
 accRate2 <- sum(diff(smp2) != 0) / r
 ess2 <- coda::effectiveSize(smp2)
 
@@ -81,9 +79,8 @@ conf$removeSamplers()
 conf$addSampler('theta', 'RW', control = list(adaptive = FALSE, scale = sqrt(tau2)))
 mcmc <- buildMCMC(conf)
 cmcmc <- compileNimble(mcmc, resetFunctions = TRUE)
-cmcmc$run(r)
+smp3 <- runMCMC(cmcmc, niter = r)
 
-smp3 <- as.matrix(cmcmc$mvSamples)
 accRate3 <- sum(diff(smp3) != 0) / r
 ess3 <- coda::effectiveSize(smp3)
 

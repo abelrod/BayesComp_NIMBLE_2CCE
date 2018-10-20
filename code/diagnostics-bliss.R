@@ -21,14 +21,12 @@ cmcmc <- compileNimble(mcmc, project = blissModel, resetFunctions = TRUE)
 
 cBlissModel$setInits(inits1)
 set.seed(1)
-cmcmc$run(nIts)
-smp1 <- as.matrix(cmcmc$mvSamples)
+smp1 <- runMCMC(cmcmc, nIts)
 
 cBlissModel$setInits(inits2)
 set.seed(1)
-cmcmc$run(nIts)
 
-smp2 <- as.matrix(cmcmc$mvSamples)
+smp2 <- runMCMC(cmcmc, nIts)
 
 ## note that NIMBLE can also run multiple MCMCs using runMCMC
 

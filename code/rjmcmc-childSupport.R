@@ -72,9 +72,7 @@ conf$addSampler(target = 'beta_enforce', type = 'RW_sampler_nonzero_indicator',
 mcmc <- buildMCMC(conf)
 cmcmc <- compileNimble(mcmc, project = model)
 
-cmcmc$run(5000)
-
-smp <- as.matrix(cmcmc$mvSamples)
+smp <- runMCMC(cmcmc, 5000)
 
 beta_enforce <- smp[ , 'beta_enforce']
 
@@ -137,9 +135,7 @@ conf$addSampler(target = 'beta_enforce', type = 'RW_sampler_nonzero_indicator',
 mcmc <- buildMCMC(conf)
 cmcmc <- compileNimble(mcmc, project = model)
 
-cmcmc$run(5000)
-
-smpDA <- as.matrix(cmcmc$mvSamples)
+smpDA <- runMCMC(cmcmc, 5000)
 
 beta_enforce <- smpDA[ , 'beta_enforce']
 

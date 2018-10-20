@@ -41,9 +41,8 @@ cmcmc <- compileNimble(mcmc, project = glmmModel)
 
 nIts <- 10000
 set.seed(1)
-cmcmc$run(nIts)
 
-smp_basic <- as.matrix(cmcmc$mvSamples)
+smp_basic <- runMCMC(cmcmc, niter = nIts)
 
 ## @knitr litters-mcmc-results
 pdf(file.path('plots','gibbs-litters.pdf'), width=6, height=4)
