@@ -43,7 +43,7 @@ a \textit{vertex}) holds one value, which may be a scalar or a vector.
 \textit{Edges} define the relationships between nodes.  A huge variety
 of statistical models can be thought of as graphs.  See also:
 \begin{itemize}
-\item Chapter 5 of the NIMBLE manual -- http://r-nimble.org/documentation
+\item Chapter 5 of the NIMBLE manual -- https://r-nimble.org/documentation
 \item the BUGS manual -- http://www.openbugs.net/Manuals/ModelSpecification.html
 \end{itemize}
 }
